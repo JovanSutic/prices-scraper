@@ -1,11 +1,6 @@
 import * as cheerio from "cheerio";
 import { fetchData } from "./fetch";
-
-interface PriceItem {
-  year: string;
-  product: string;
-  price: string;
-}
+import type { HistoryScrapData, PriceItem } from "../types/scraper";
 
 /**
  * Function to scrape data from the tables on the webpage.
@@ -14,16 +9,14 @@ interface PriceItem {
  */
 export async function scrapeTables(
   url: string
-): Promise<Record<string, PriceItem[]>> {
+): Promise<HistoryScrapData> {
   try {
     const response = await fetchData(url);
     const $ = cheerio.load(response);
 
-    const tablesData: Record<string, PriceItem[]> = {};
+    const tablesData: HistoryScrapData = {};
 
-    // Find all tables with the specific class that represents the tables you want to scrape
     $("table").each((index: any, table: any) => {
-      // Get the title of the table (assumes each table has a heading or title)
       const tableTitle = $(table).prev("h3").text();
       const tableRows: PriceItem[] = [];
 
