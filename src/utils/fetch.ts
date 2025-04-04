@@ -56,21 +56,3 @@ interface AsyncResult<T> {
   result?: T;
   error?: string;
 }
-
-export async function handleAsync<T>(
-  fn: () => Promise<T>,
-  defaultValue?: T
-): Promise<AsyncResult<T>> {
-  if (defaultValue) {
-    return { success: true, result: defaultValue };
-  }
-  try {
-    const result = await fn();
-    return { success: true, result };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    };
-  }
-}
