@@ -1,3 +1,4 @@
+import { CreateCategoryDto } from "../../../node-test/src/categories/categories.dto";
 export enum PriceType {
   CURRENT = "CURRENT",
   HISTORICAL = "HISTORICAL",
@@ -15,8 +16,20 @@ export interface Year {
   year: number;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+}
+
 export interface Product {
   id: number;
+  name: string;
+  categoryId: number;
+  unit: string;
+  description?: string;
+}
+
+export interface CreateProduct {
   name: string;
   categoryId: number;
   unit: string;
@@ -30,6 +43,10 @@ export interface CreatePrice {
   productId: number;
   yearId: number;
   priceType: PriceType;
+}
+
+export interface CreateCategory {
+  name: string;
 }
 
 export interface PrepPricesConfig {

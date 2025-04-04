@@ -7,11 +7,9 @@ import type { HistoryScrapData, PriceItem } from "../types/scraper";
  * @param url - The URL of the page to scrape.
  * @returns A promise that resolves with an array of objects representing the tables and their data.
  */
-export async function scrapeTables(
-  url: string
-): Promise<HistoryScrapData> {
+export async function scrapeTables(url: string): Promise<HistoryScrapData> {
   try {
-    const response = await fetchData(url);
+    const response = await fetchData(url, { result: "TEXT" });
     const $ = cheerio.load(response);
 
     const tablesData: HistoryScrapData = {};
