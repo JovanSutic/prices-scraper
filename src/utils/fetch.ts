@@ -15,7 +15,7 @@ export async function fetchData(
   url: string,
   options: FetchDataOptions = {}
 ): Promise<any> {
-  const { method = "GET", data, headers = {}, result = "TEXT" } = options;
+  const { method = "GET", data, headers = {}, result = "JSON" } = options;
 
   const defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
@@ -49,4 +49,10 @@ export async function fetchData(
     console.error(`Error in ${method} request:`, error);
     throw error;
   }
+}
+
+interface AsyncResult<T> {
+  success: boolean;
+  result?: T;
+  error?: string;
 }
