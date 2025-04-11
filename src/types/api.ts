@@ -50,7 +50,8 @@ export interface CreateCategory {
 }
 
 export interface PrepPricesConfig {
-  products: Record<string, Product>;
-  years: Record<string, Year>;
+  products: Record<string, number>;
+  years: Record<string, number>;
+  categories: Record<string, number>;
   city: number;
 }
