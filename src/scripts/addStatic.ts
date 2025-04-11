@@ -5,7 +5,7 @@ import { prepProducts } from "../utils/prep";
 import { scrapeTables } from "../utils/scrapHistory";
 
 (async function () {
-  const token = "";
+  const token = process.env.AUTH_TOKEN;
   const baseUrl = "http://3.77.158.72:3000/";
   const scrapUrl =
     "https://www.numbeo.com/cost-of-living/city-history/in/Bucharest?displayCurrency=EUR";
