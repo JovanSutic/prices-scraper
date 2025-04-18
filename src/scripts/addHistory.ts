@@ -6,7 +6,7 @@ import { scrapeTables } from "../utils/scrapHistory";
 
 (async function () {
   const token = process.env.AUTH_TOKEN;
-  const baseUrl = "http://3.77.158.72:3000/";
+  const baseUrl = process.env.BASE_URL;
   const scrapUrl =
     "https://www.numbeo.com/cost-of-living/city-history/in/Belgrade?displayCurrency=EUR";
 
