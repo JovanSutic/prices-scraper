@@ -1,5 +1,5 @@
 export interface FetchDataOptions {
-  method?: "GET" | "POST";
+  method?: "GET" | "POST" | "PUT";
   data?: any;
   headers?: Record<string, string>;
   result?: "JSON" | "TEXT";
@@ -35,6 +35,7 @@ export async function fetchData(
     const response = await fetch(url, requestOptions);
 
     if (!response.ok) {
+      console.log(response);
       throw new Error(`Request failed. Status: ${response.status}`);
     }
 
