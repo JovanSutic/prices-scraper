@@ -6,7 +6,13 @@ import {
   type CreateProduct,
   type PrepPricesConfig,
 } from "../types/api";
-import type { HistoryScrapData } from "../types/scraper";
+import type {
+  CurrentItem,
+  CurrentMaps,
+  CurrentProduct,
+  HistoryScrapData,
+} from "../types/scraper";
+import { categories, products } from "../../../node-test/prisma/seedData";
 
 export function prepCategories(scrapData: HistoryScrapData) {
   const keys = Object.keys(scrapData);
@@ -76,6 +82,54 @@ export function prepPrices(
         result.push(price);
       }
     });
+  }
+
+  return result;
+}
+
+function extractProductAndCategory(
+  current: CurrentItem,
+  productMap: Record<string, CurrentProduct>,
+  categories: Record<string, number>
+) {
+  const category = categories[current.category];
+
+  if (category && productMap[`${current.product}_${category}`]) {
+    return productMap[`${current.product}_${category}`];
+  }
+
+  if (productMap[current.product]) {
+    return productMap[current.product];
+  }
+
+  return null;
+}
+
+export function prepCurrent(current: CurrentItem[], maps: CurrentMaps) {
+  const { categories, products, city, year } = maps;
+  const result: CreatePrice[] = [];
+
+  for (let index = 0; index < current.length; index++) {
+    const currentItem = current[index];
+    const foreignKeys = extractProductAndCategory(
+      currentItem!,
+      products,
+      categories
+    );
+
+    if (city && year && currentItem && foreignKeys) {
+      const price = {
+        price: currentItem.price > 0 ? currentItem.price : 0.1,
+        bottom: currentItem.bottom,
+        top: currentItem.top,
+        currency: "EUR",
+        cityId: city,
+        productId: foreignKeys.id,
+        yearId: year,
+        priceType: PriceType.CURRENT,
+      };
+      result.push(price);
+    }
   }
 
   return result;

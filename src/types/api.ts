@@ -4,6 +4,12 @@ export enum PriceType {
   HISTORICAL = "HISTORICAL",
 }
 
+export enum ProductType {
+  ALL = "ALL",
+  CURRENT = "CURRENT",
+  HISTORICAL = "HISTORICAL",
+}
+
 export interface City {
   id: number;
   name: string;
@@ -27,6 +33,7 @@ export interface Product {
   categoryId: number;
   unit: string;
   description?: string;
+  type?: ProductType;
 }
 
 export interface CreateProduct {
@@ -34,10 +41,13 @@ export interface CreateProduct {
   categoryId: number;
   unit: string;
   description?: string;
+  type?: ProductType;
 }
 
 export interface CreatePrice {
   price: number;
+  bottom?: number;
+  top?: number;
   currency: string;
   cityId: number;
   productId: number;
