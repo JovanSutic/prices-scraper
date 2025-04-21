@@ -1,4 +1,4 @@
-import type { Category, Product, Year } from "../types/api";
+import type { Category, City, Product, Year } from "../types/api";
 import type { CurrentItem, CurrentProduct } from "../types/scraper";
 import { fetchData } from "../utils/fetch";
 import { prepCurrent, prepPrices } from "../utils/prep";
@@ -7,27 +7,10 @@ import { scrapeCurrent } from "../utils/scrapCurrent";
 (async function () {
   const token = process.env.AUTH_TOKEN;
   const baseUrl = process.env.BASE_URL;
-  const scrapUrl =
-    "https://www.numbeo.com/cost-of-living/in/Belgrade?displayCurrency=EUR";
 
-  let resultScrape: CurrentItem[] = [];
   const categoriesMap: Record<string, number> = {};
   const productsMap: Record<string, CurrentProduct> = {};
-  const scrapCategories: Record<string, boolean> = {};
-
-  try {
-    resultScrape = await scrapeCurrent(scrapUrl);
-    resultScrape.forEach((item) => {
-      if (!scrapCategories[item.category]) {
-        scrapCategories[item.category] = true;
-      }
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      console.log(error.message);
-      throw error;
-    }
-  }
+  const neededCites: City[] = [];
 
   try {
     const categories: Category[] = await fetchData(`${baseUrl}categories/`, {
@@ -79,34 +62,89 @@ import { scrapeCurrent } from "../utils/scrapCurrent";
     }
   }
 
-  if (
-    resultScrape &&
-    Object.keys(categoriesMap).length &&
-    Object.keys(productsMap).length
-  ) {
-    const prices = prepCurrent(resultScrape, {
-      products: productsMap,
-      year: 16,
-      city: 1,
-      categories: categoriesMap,
+  try {
+    const cities: City[] = await fetchData(`${baseUrl}cities/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
     });
 
-    if (prices.length) {
-      console.log("SAVING PRICES UNDER WAY");
-      try {
-        const { count } = await fetchData(`${baseUrl}prices/`, {
-          method: "POST",
-          data: prices,
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        console.log(`We added ${count} prices records.`);
-      } catch (error) {
-        if (error instanceof Error) {
-          console.log(error.message);
-          throw error;
+    if (cities.length) {
+      cities.forEach((item) => {
+        if (item.id !== 1) {
+          neededCites.push(item);
+        }
+      });
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log(error.message);
+      throw error;
+    }
+  }
+
+  if (
+    Object.keys(categoriesMap).length &&
+    Object.keys(productsMap).length &&
+    neededCites.length
+  ) {
+    for (let index = 0; index < neededCites.length; index++) {
+      const element = neededCites[index];
+
+      if (element) {
+        const scrapUrl = `https://www.numbeo.com/cost-of-living/in/${element.search}?displayCurrency=EUR`;
+
+        let resultScrape: CurrentItem[] = [];
+        const scrapCategories: Record<string, boolean> = {};
+
+        try {
+          resultScrape = await scrapeCurrent(scrapUrl);
+          resultScrape.forEach((item) => {
+            if (!scrapCategories[item.category]) {
+              scrapCategories[item.category] = true;
+            }
+          });
+        } catch (error) {
+          if (error instanceof Error) {
+            console.log(error.message);
+            throw error;
+          }
+        }
+
+        if (resultScrape.length) {
+          const prices = prepCurrent(resultScrape, {
+            products: productsMap,
+            year: 16,
+            city: element.id,
+            categories: categoriesMap,
+          });
+
+          const missingPrices = prices.filter(
+            (item) => item.price === 0.01
+          ).length;
+
+          if (prices.length) {
+            console.log(
+              `SAVING CURRENT FOR ${element?.name} PRICES UNDER WAY - COUNT ${prices.length} | MISSING ${(missingPrices / prices.length * 100).toFixed(2)}%`
+            );
+            try {
+              const { count } = await fetchData(`${baseUrl}prices/`, {
+                method: "POST",
+                data: prices,
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              });
+              console.log(`We added ${count} prices records.`);
+            } catch (error) {
+              if (error instanceof Error) {
+                console.log(error.message);
+                throw error;
+              }
+            }
+          }
         }
       }
     }
