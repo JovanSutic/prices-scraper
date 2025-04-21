@@ -14,7 +14,10 @@ export interface City {
   id: number;
   name: string;
   country: string;
-  numbeo_id?: number;
+  search: string;
+  lat: number;
+  lng: number;
+  seaside: boolean;
 }
 
 export interface Year {

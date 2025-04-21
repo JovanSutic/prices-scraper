@@ -119,7 +119,7 @@ export function prepCurrent(current: CurrentItem[], maps: CurrentMaps) {
 
     if (city && year && currentItem && foreignKeys) {
       const price = {
-        price: currentItem.price > 0 ? currentItem.price : 0.1,
+        price: currentItem.price > 0 ? currentItem.price : 0.01,
         bottom: currentItem.bottom,
         top: currentItem.top,
         currency: "EUR",
