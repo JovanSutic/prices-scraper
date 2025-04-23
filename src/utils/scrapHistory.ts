@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { fetchData } from "./fetch";
+import { fetchScrap } from "./fetch";
 import type { HistoryScrapData, PriceItem } from "../types/scraper";
 
 /**
@@ -7,11 +7,10 @@ import type { HistoryScrapData, PriceItem } from "../types/scraper";
  * @param url - The URL of the page to scrape.
  * @returns A promise that resolves with an array of objects representing the tables and their data.
  */
-export async function scrapeTables(url: string): Promise<HistoryScrapData> {
+export async function scrapeTables(url: string, proxy: boolean): Promise<HistoryScrapData> {
   try {
-    const response = await fetchData(url, { result: "TEXT" });
+    const response = await fetchScrap(url, proxy);
     const $ = cheerio.load(response);
-
     const tablesData: HistoryScrapData = {};
 
     $("table").each((index: any, table: any) => {

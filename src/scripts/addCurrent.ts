@@ -7,9 +7,11 @@ import { scrapeCurrent } from "../utils/scrapCurrent";
 (async function () {
   const token = process.env.AUTH_TOKEN;
   const baseUrl = process.env.BASE_URL;
+  const proxy = true;
 
   const categoriesMap: Record<string, number> = {};
   const productsMap: Record<string, CurrentProduct> = {};
+  const uniqueCitiesMap: Record<string, boolean> = {};
   const neededCites: City[] = [];
 
   try {
@@ -63,6 +65,26 @@ import { scrapeCurrent } from "../utils/scrapCurrent";
   }
 
   try {
+    const uniqueCities: { data: number[]; count: number } = await fetchData(
+      `${baseUrl}prices/unique-cities?priceType=CURRENT`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    uniqueCities.data.forEach((item) => {
+      uniqueCitiesMap[`${item}`] = true;
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log(error.message);
+      throw error;
+    }
+  }
+
+  try {
     const cities: City[] = await fetchData(`${baseUrl}cities/`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -72,7 +94,7 @@ import { scrapeCurrent } from "../utils/scrapCurrent";
 
     if (cities.length) {
       cities.forEach((item) => {
-        if (item.id !== 1) {
+        if (!uniqueCitiesMap[item.id]) {
           neededCites.push(item);
         }
       });
@@ -94,12 +116,13 @@ import { scrapeCurrent } from "../utils/scrapCurrent";
 
       if (element) {
         const scrapUrl = `https://www.numbeo.com/cost-of-living/in/${element.search}?displayCurrency=EUR`;
+        console.log(scrapUrl);
 
         let resultScrape: CurrentItem[] = [];
         const scrapCategories: Record<string, boolean> = {};
 
         try {
-          resultScrape = await scrapeCurrent(scrapUrl);
+          resultScrape = await scrapeCurrent(scrapUrl, proxy);
           resultScrape.forEach((item) => {
             if (!scrapCategories[item.category]) {
               scrapCategories[item.category] = true;
@@ -126,7 +149,11 @@ import { scrapeCurrent } from "../utils/scrapCurrent";
 
           if (prices.length) {
             console.log(
-              `SAVING CURRENT FOR ${element?.name} PRICES UNDER WAY - COUNT ${prices.length} | MISSING ${(missingPrices / prices.length * 100).toFixed(2)}%`
+              `SAVING CURRENT FOR ${element?.name} PRICES UNDER WAY - COUNT ${
+                prices.length
+              } | MISSING ${((missingPrices / prices.length) * 100).toFixed(
+                2
+              )}%`
             );
             try {
               const { count } = await fetchData(`${baseUrl}prices/`, {
