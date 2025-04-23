@@ -7,6 +7,7 @@ import { scrapeTables } from "../utils/scrapHistory";
 (async function () {
   const token = process.env.AUTH_TOKEN;
   const baseUrl = process.env.BASE_URL;
+  const proxy = true;
 
   const categoriesMap: Record<string, number> = {};
   const productsMap: Record<string, number> = {};
@@ -76,7 +77,7 @@ import { scrapeTables } from "../utils/scrapHistory";
 
   try {
     const uniqueCities: { data: number[]; count: number } = await fetchData(
-      `${baseUrl}prices/unique-cities`,
+      `${baseUrl}prices/unique-cities?priceType=HISTORICAL`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -116,6 +117,7 @@ import { scrapeTables } from "../utils/scrapHistory";
     }
   }
 
+
   if (
     Object.keys(categoriesMap).length &&
     Object.keys(productsMap).length &&
@@ -128,9 +130,10 @@ import { scrapeTables } from "../utils/scrapHistory";
       if (element) {
         const scrapUrl = `https://www.numbeo.com/cost-of-living/city-history/in/${element?.search}?displayCurrency=EUR`;
         let resultScrape: HistoryScrapData | undefined;
+        console.log(scrapUrl);
 
         try {
-          resultScrape = await scrapeTables(scrapUrl);
+          resultScrape = await scrapeTables(scrapUrl, proxy);
         } catch (error) {
           if (error instanceof Error) {
             console.log(error.message);

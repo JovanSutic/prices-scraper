@@ -1,3 +1,5 @@
+import crawlbase, { CrawlingAPI } from "crawlbase";
+
 export interface FetchDataOptions {
   method?: "GET" | "POST" | "PUT";
   data?: any;
@@ -52,8 +54,28 @@ export async function fetchData(
   }
 }
 
-interface AsyncResult<T> {
-  success: boolean;
-  result?: T;
-  error?: string;
+const api = new CrawlingAPI({
+  token: "Ru9Tj21KLrR3gMatnavS_g",
+  timeout: 30000,
+});
+
+export async function fetchWithProxy(url: string) {
+  try {
+    const proxyData = await api.get(url);
+
+    return proxyData.body;
+  } catch (error: any) {
+    if (error instanceof Error) {
+      console.error(`Error with Crawlbase Proxy:`, error?.message);
+      throw error;
+    }
+  }
+}
+
+export async function fetchScrap(url: string, proxy: boolean) {
+  if (proxy) {
+    return await fetchWithProxy(url);
+  }
+
+  return await fetchData(url, { result: "TEXT" });
 }

@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { fetchData } from "./fetch";
+import { fetchData, fetchScrap } from "./fetch";
 import type { CurrentItem } from "../types/scraper";
 import type { Product, ProductType } from "../types/api";
 
@@ -17,9 +17,9 @@ export function parseEuroString(value: string) {
  * @param url - The URL of the page to scrape.
  * @returns A promise that resolves with an array of objects representing the tables and their data.
  */
-export async function scrapeCurrent(url: string): Promise<CurrentItem[]> {
+export async function scrapeCurrent(url: string, proxy: boolean): Promise<CurrentItem[]> {
   try {
-    const response = await fetchData(url, { result: "TEXT" });
+    const response = await fetchScrap(url, proxy);
     const $ = cheerio.load(response);
 
     const tableRows: CurrentItem[] = [];
