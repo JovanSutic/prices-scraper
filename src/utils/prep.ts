@@ -5,6 +5,7 @@ import {
   type CreatePrice,
   type CreateProduct,
   type PrepPricesConfig,
+  type Price,
 } from "../types/api";
 import type {
   CurrentItem,
@@ -117,6 +118,11 @@ export function prepCurrent(current: CurrentItem[], maps: CurrentMaps) {
       categories
     );
 
+    // console.log(city);
+    // console.log(year);
+    // console.log(foreignKeys);
+    // console.log("------")
+
     if (city && year && currentItem && foreignKeys) {
       const price = {
         price: currentItem.price > 0 ? currentItem.price : 0.01,
@@ -133,4 +139,17 @@ export function prepCurrent(current: CurrentItem[], maps: CurrentMaps) {
   }
 
   return result;
+}
+
+export function areCurrentEqual(base: Price, compare: CreatePrice) {
+  if (base.price !== compare.price) {
+    return false;
+  }
+  if ((base.bottom || compare.bottom) && base.bottom !== compare.bottom) {
+    return false;
+  }
+  if ((base.top || compare.top) && base.top !== compare.top) {
+    return false;
+  }
+  return true;
 }
