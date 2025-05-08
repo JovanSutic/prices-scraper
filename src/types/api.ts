@@ -58,6 +58,18 @@ export interface CreatePrice {
   priceType: PriceType;
 }
 
+export interface Price {
+  id: number;
+  price: number;
+  bottom?: number;
+  top?: number;
+  currency: string;
+  cityId: number;
+  productId: number;
+  yearId: number;
+  priceType: PriceType;
+}
+
 export interface CreateCategory {
   name: string;
 }
@@ -67,4 +79,11 @@ export interface PrepPricesConfig {
   years: Record<string, number>;
   categories: Record<string, number>;
   city: number;
+}
+
+export interface CreateSocialLifestyle {
+  avg_price: number;
+  currency: string;
+  cityId: number;
+  yearId: number;
 }
