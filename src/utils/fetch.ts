@@ -29,7 +29,7 @@ export async function fetchData(
     headers: defaultHeaders,
   };
 
-  if (method === "POST" && data) {
+  if ((method === "POST" || method === "PUT") && data) {
     requestOptions.body = JSON.stringify(data);
   }
 
@@ -37,7 +37,8 @@ export async function fetchData(
     const response = await fetch(url, requestOptions);
 
     if (!response.ok) {
-      console.log(response);
+      const errorText = await response.text();
+      console.error("Server responded with:", errorText);
       throw new Error(`Request failed. Status: ${response.status}`);
     }
 

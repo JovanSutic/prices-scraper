@@ -22,6 +22,8 @@ export async function scrapeCurrent(url: string, proxy: boolean): Promise<Curren
     const response = await fetchScrap(url, proxy);
     const $ = cheerio.load(response);
 
+    // console.log($.html());
+
     const tableRows: CurrentItem[] = [];
     let category = "";
 
