@@ -1,4 +1,8 @@
 import type { City, Price, CreateSocialLifestyle } from "../types/api";
+import {
+  calculateSocialLifestyleBudget,
+  formatCurrency,
+} from "../utils/budget";
 import { fetchData } from "../utils/fetch";
 
 (async function () {
@@ -6,12 +10,6 @@ import { fetchData } from "../utils/fetch";
   const baseUrl = process.env.BASE_URL;
 
   let richCities: City[] = [];
-
-  const citiesList: number[] = [];
-  const productList: number[] = [
-    1, 2, 3, 4, 5, 6, 7, 8, 27, 28, 29, 30, 34, 36, 38, 39, 40, 41, 49, 50, 51,
-  ];
-
   const socialLifestyleList: CreateSocialLifestyle[] = [];
 
   try {
@@ -22,12 +20,8 @@ import { fetchData } from "../utils/fetch";
       },
     });
 
-    richCities = cities;
-
     if (cities.length) {
-      cities.forEach((item) => {
-        citiesList.push(item.id);
-      });
+      richCities = cities;
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -36,13 +30,15 @@ import { fetchData } from "../utils/fetch";
     }
   }
 
-  if (citiesList.length) {
-    for (let index = 0; index < citiesList.length; index++) {
-      const city = citiesList[index];
+  if (richCities.length) {
+    for (let index = 0; index < richCities.length; index++) {
+      const city = richCities[index];
+
+      if (!city) continue;
 
       try {
         const { data: prices }: { data: Price[] } = await fetchData(
-          `${baseUrl}prices?limit=100&priceType=CURRENT&sortBy=productId&order=asc&cityId=${city}`,
+          `${baseUrl}prices?limit=100&priceType=CURRENT&sortBy=productId&order=asc&cityId=${city.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -51,37 +47,19 @@ import { fetchData } from "../utils/fetch";
           }
         );
 
-        if (prices.length) {
-          const socialLifestylePrices: Price[] = [];
+        if (prices.length && prices.length > 54) {
+          const budget = calculateSocialLifestyleBudget(prices);
 
-          productList.forEach((item) => {
-            const match = prices.find((price) => price.productId === item);
-            if (match) {
-              socialLifestylePrices.push(match);
-            }
-          });
-
-          const diff = productList.length - socialLifestylePrices.length;
-
-          if(diff > 0) {
-            const leaveCity = richCities.find((item) => item.id === city);
-            console.log(`${leaveCity?.name} has ${diff} prices less than we need`);
-          }
-
-          if (
-            socialLifestylePrices[0] &&
-            socialLifestylePrices.length === productList.length &&
-            city
-          ) {
+          if (prices[0] && budget && city) {
             socialLifestyleList.push({
-              cityId: city,
-              yearId: socialLifestylePrices[0].yearId,
+              cityId: city.id,
+              yearId: prices[0].yearId,
               currency: "EUR",
-              avg_price: socialLifestylePrices.reduce(
-                (acc, next) => acc + next.price,
-                0
-              ),
+              avg_price: budget,
             });
+            console.log(
+              `Adding ${city.name} with budget of ${formatCurrency(budget)}`
+            );
           }
         }
       } catch (error) {
@@ -91,11 +69,26 @@ import { fetchData } from "../utils/fetch";
         }
       }
     }
-  }
 
-  
-  console.log(socialLifestyleList.length);
-  console.log(citiesList.length);
+    if (socialLifestyleList.length) {
+        try {
+          const { count } = await fetchData(`${baseUrl}social_lifestyle/`, {
+            method: "POST",
+            data: socialLifestyleList,
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+          console.log(`We added ${count} social lifestyle records.`);
+        } catch (error) {
+          if (error instanceof Error) {
+            console.log(error.message);
+            throw error;
+          }
+        }
+      }
+  }
 
   console.log("ADD SOCIAL LIFESTYLE SCRIPT IS DONE");
 })();
