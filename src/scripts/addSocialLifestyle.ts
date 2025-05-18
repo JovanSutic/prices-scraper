@@ -1,4 +1,5 @@
 import type { City, Price, CreateSocialLifestyle } from "../types/api";
+import { SocialType } from "../types/utils";
 import {
   calculateSocialLifestyleBudget,
   formatCurrency,
@@ -13,7 +14,7 @@ import { fetchData } from "../utils/fetch";
   const socialLifestyleList: CreateSocialLifestyle[] = [];
 
   try {
-    const cities: City[] = await fetchData(`${baseUrl}cities/`, {
+    const cities: City[] = await fetchData(`${baseUrl}cities/missing-social-report?type=SOLO`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -47,7 +48,12 @@ import { fetchData } from "../utils/fetch";
           }
         );
 
-        if (prices.length && prices.length > 54) {
+        const missingPrice = prices.find((item) => item.price === 0.01);
+        if (missingPrice) {
+          console.log(`${city.name} has missing price.`);
+        }
+
+        if (prices.length && prices.length > 54 && !missingPrice) {
           const budget = calculateSocialLifestyleBudget(prices);
 
           if (prices[0] && budget && city) {
@@ -55,6 +61,7 @@ import { fetchData } from "../utils/fetch";
               cityId: city.id,
               yearId: prices[0].yearId,
               currency: "EUR",
+              type: SocialType.SOLO,
               avg_price: budget,
             });
             console.log(
@@ -71,23 +78,23 @@ import { fetchData } from "../utils/fetch";
     }
 
     if (socialLifestyleList.length) {
-        try {
-          const { count } = await fetchData(`${baseUrl}social_lifestyle/`, {
-            method: "POST",
-            data: socialLifestyleList,
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          });
-          console.log(`We added ${count} social lifestyle records.`);
-        } catch (error) {
-          if (error instanceof Error) {
-            console.log(error.message);
-            throw error;
-          }
+      try {
+        const { count } = await fetchData(`${baseUrl}social_lifestyle/`, {
+          method: "POST",
+          data: socialLifestyleList,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        console.log(`We added ${count} social lifestyle records.`);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.log(error.message);
+          throw error;
         }
       }
+    }
   }
 
   console.log("ADD SOCIAL LIFESTYLE SCRIPT IS DONE");

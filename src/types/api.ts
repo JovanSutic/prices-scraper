@@ -1,4 +1,5 @@
 import { CreateCategoryDto } from "../../../node-test/src/categories/categories.dto";
+import type { SocialType } from "./utils";
 export enum PriceType {
   CURRENT = "CURRENT",
   HISTORICAL = "HISTORICAL",
@@ -86,4 +87,15 @@ export interface CreateSocialLifestyle {
   currency: string;
   cityId: number;
   yearId: number;
+  type: SocialType;
+}
+
+export interface SocialLifestyle {
+  id: number;
+  avg_price: number;
+  currency: string;
+  cityId: number;
+  yearId: number;
+  type: SocialType;
+  created_at: string;
 }

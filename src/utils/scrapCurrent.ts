@@ -1,7 +1,8 @@
 import * as cheerio from "cheerio";
 import { fetchData, fetchScrap } from "./fetch";
 import type { CurrentItem } from "../types/scraper";
-import type { Product, ProductType } from "../types/api";
+import type { Product, ProductType, SocialLifestyle } from "../types/api";
+import type { SocialType } from "../types/utils";
 
 export function parseEuroString(value: string) {
   if (value) {
@@ -17,7 +18,10 @@ export function parseEuroString(value: string) {
  * @param url - The URL of the page to scrape.
  * @returns A promise that resolves with an array of objects representing the tables and their data.
  */
-export async function scrapeCurrent(url: string, proxy: boolean): Promise<CurrentItem[]> {
+export async function scrapeCurrent(
+  url: string,
+  proxy: boolean
+): Promise<CurrentItem[]> {
   try {
     const response = await fetchScrap(url, proxy);
     const $ = cheerio.load(response);
@@ -84,6 +88,48 @@ export async function addProductType(type: ProductType, token: string) {
 
     return products;
   } catch (error: any) {
+    if (error instanceof Error) {
+      console.log(error.message);
+      throw error;
+    }
+  }
+}
+
+export async function addBudgetType(type: SocialType, token: string) {
+  const baseUrl = process.env.BASE_URL;
+  try {
+    const social: { data: SocialLifestyle[] } = await fetchData(
+      `${baseUrl}social_lifestyle?limit=300&sortBy=id&order=asc`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (social.data.length) {
+      const res: SocialLifestyle[] = [];
+
+      social.data.forEach((item) => {
+        res.push({
+          ...item,
+          type,
+        });
+      });
+
+      if (res.length) {
+        const updateResult = await fetchData(`${baseUrl}social_lifestyle/`, {
+          method: "PUT",
+          data: res,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+      }
+    }
+  } catch (error) {
     if (error instanceof Error) {
       console.log(error.message);
       throw error;
