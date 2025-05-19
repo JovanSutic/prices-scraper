@@ -1,8 +1,14 @@
 import * as cheerio from "cheerio";
 import { fetchData, fetchScrap } from "./fetch";
 import type { CurrentItem } from "../types/scraper";
-import type { Product, ProductType, SocialLifestyle } from "../types/api";
-import type { SocialType } from "../types/utils";
+import type {
+  Price,
+  Product,
+  ProductType,
+  SocialLifestyle,
+} from "../types/api";
+import type { AveragePrice, SocialType } from "../types/utils";
+import { roundToTwoDecimals } from "./budget";
 
 export function parseEuroString(value: string) {
   if (value) {
@@ -134,5 +140,89 @@ export async function addBudgetType(type: SocialType, token: string) {
       console.log(error.message);
       throw error;
     }
+  }
+}
+
+export async function changeUnmarkedPrices(country: string, token: string) {
+  const baseUrl = process.env.BASE_URL;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+
+  let unMarkedPrices: Price[] = [];
+  let averagePrices: AveragePrice[] = [];
+
+  try {
+    unMarkedPrices = await fetchData(
+      `${baseUrl}prices/unmarked-prices?priceType=CURRENT&yearId=16&country=${country}`,
+      { headers }
+    );
+    console.log(`Fetched ${unMarkedPrices.length} unmarked prices.`);
+  } catch (error) {
+    console.error("Error fetching unmarked prices:", error);
+    throw error;
+  }
+
+  if (!unMarkedPrices.length) {
+    console.log("No unmarked prices found.");
+    return;
+  }
+
+  try {
+    averagePrices = await fetchData(
+      `${baseUrl}prices/average-country-prices?priceType=CURRENT&yearId=16&country=${country}`,
+      { headers }
+    );
+    console.log(`Fetched ${averagePrices.length} average prices.`);
+  } catch (error) {
+    console.error("Error fetching average prices:", error);
+    throw error;
+  }
+
+  if (!averagePrices.length) {
+    console.log("No average prices available.");
+    return;
+  }
+
+  const averagePriceMap = new Map<number, number>();
+  averagePrices.forEach((item) => {
+    if (item.productId && item.average_price > 0) {
+      averagePriceMap.set(item.productId, item.average_price);
+    }
+  });
+
+  const resultToUpdate = unMarkedPrices
+    .filter((item) => averagePriceMap.has(item.productId))
+    .map((item) => ({
+      ...item,
+      price: roundToTwoDecimals(averagePriceMap.get(item.productId)!),
+    }));
+
+  if (!resultToUpdate.length) {
+    console.log("No matching unmarked prices found to update.");
+    return;
+  }
+
+  try {
+    let updatedResults = "";
+    resultToUpdate.forEach((item) => {
+      updatedResults = updatedResults + ` ${item.cityId},`;
+    });
+
+    const updateResult = await fetchData(`${baseUrl}prices/`, {
+      method: "PUT",
+      data: resultToUpdate,
+      headers,
+    });
+    console.log(
+      `Successfully updated ${
+        Array.isArray(updateResult) ? updateResult.length : 1
+      } prices.`
+    );
+    console.log(`Cities for budget update: ${updatedResults}`);
+  } catch (error) {
+    console.error("Error updating prices:", error);
+    throw error;
   }
 }
