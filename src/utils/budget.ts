@@ -1,5 +1,6 @@
-import type { Price } from "../types/api";
+import type { Price, SocialLifestyle } from "../types/api";
 import type { BudgetItem } from "../types/utils";
+import { fetchData } from "./fetch";
 
 export function roundToTwoDecimals(value: number): number {
   const decimals = value.toString().split(".")[1];
@@ -81,4 +82,82 @@ export function formatCurrency(
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
+}
+
+export async function recalculateBudget(cityId: number, token: string) {
+  const baseUrl = process.env.BASE_URL;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+
+  let budget: SocialLifestyle | null = null;
+  let prices: Price[] = [];
+
+  try {
+    const { data } = await fetchData(
+      `${baseUrl}social_lifestyle/?limit=1&sortBy=id&order=asc&cityId=${cityId}`,
+      { headers }
+    );
+
+    if (data.length) {
+      budget = data[0];
+      console.log(`Fetched budget with id: ${data[0].id} .`);
+    }
+  } catch (error) {
+    console.error("Error fetching budget:", error);
+    throw error;
+  }
+
+  if (!budget) {
+    console.log("We couldn't find the budget");
+    return;
+  }
+
+  try {
+    const { data }: { data: Price[] } = await fetchData(
+      `${baseUrl}prices?limit=100&priceType=CURRENT&sortBy=productId&order=asc&cityId=${cityId}`,
+      { headers }
+    );
+
+    if (data.filter((item) => item.price > 0.01).length > 54) {
+      prices = data;
+    }
+  } catch (error) {
+    console.error("Error fetching prices:", error);
+    throw error;
+  }
+
+  if (!prices.length) {
+    console.log("We couldn't find the prices");
+    return;
+  }
+
+  const newBudget = calculateSocialLifestyleBudget(prices);
+
+  if (newBudget === budget.avg_price) {
+    console.log("Budgets are the same");
+    return;
+  }
+
+  console.log(
+    `The old budget is ${budget.avg_price}, while the new one is ${newBudget}`
+  );
+
+  try {
+    await fetchData(`${baseUrl}social_lifestyle/`, {
+      method: "PUT",
+      data: [
+        {
+          ...budget,
+          avg_price: newBudget,
+        },
+      ],
+      headers,
+    });
+    console.log("New budget successfully changed");
+  } catch (error) {
+    console.error("Error putting new budget:", error);
+    throw error;
+  }
 }

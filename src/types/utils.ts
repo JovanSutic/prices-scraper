@@ -8,3 +8,10 @@ export enum SocialType {
   PAIR = "PAIR",
   FAMILY = "FAMILY",
 }
+
+export interface AveragePrice {
+  country: string;
+  productId: number;
+  yearId: number;
+  average_price: number;
+}

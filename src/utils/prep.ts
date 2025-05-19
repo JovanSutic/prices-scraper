@@ -118,11 +118,6 @@ export function prepCurrent(current: CurrentItem[], maps: CurrentMaps) {
       categories
     );
 
-    // console.log(city);
-    // console.log(year);
-    // console.log(foreignKeys);
-    // console.log("------")
-
     if (city && year && currentItem && foreignKeys) {
       const price = {
         price: currentItem.price > 0 ? currentItem.price : 0.01,

@@ -14,12 +14,15 @@ import { fetchData } from "../utils/fetch";
   const socialLifestyleList: CreateSocialLifestyle[] = [];
 
   try {
-    const cities: City[] = await fetchData(`${baseUrl}cities/missing-social-report?type=SOLO`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const cities: City[] = await fetchData(
+      `${baseUrl}cities/missing-social-report?type=SOLO`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (cities.length) {
       richCities = cities;
