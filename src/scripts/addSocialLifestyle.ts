@@ -1,21 +1,26 @@
 import type { City, Price, CreateSocialLifestyle } from "../types/api";
 import { SocialType } from "../types/utils";
 import {
-  calculateSocialLifestyleBudget,
+  calculateBudget,
   formatCurrency,
+  SOLO_BUDGET,
+  PAIR_BUDGET,
+  FAMILY_BUDGET,
 } from "../utils/budget";
 import { fetchData } from "../utils/fetch";
 
 (async function () {
   const token = process.env.AUTH_TOKEN;
   const baseUrl = process.env.BASE_URL;
+  const type: SocialType = SocialType.FAMILY;
+  const budgetStructure = FAMILY_BUDGET;
 
   let richCities: City[] = [];
   const socialLifestyleList: CreateSocialLifestyle[] = [];
 
   try {
     const cities: City[] = await fetchData(
-      `${baseUrl}cities/missing-social-report?type=SOLO`,
+      `${baseUrl}cities/missing-social-report?type=${type}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -33,6 +38,8 @@ import { fetchData } from "../utils/fetch";
       throw error;
     }
   }
+
+  console.log(richCities.length);
 
   if (richCities.length) {
     for (let index = 0; index < richCities.length; index++) {
@@ -57,14 +64,14 @@ import { fetchData } from "../utils/fetch";
         }
 
         if (prices.length && prices.length > 54 && !missingPrice) {
-          const budget = calculateSocialLifestyleBudget(prices);
+          const budget = calculateBudget(budgetStructure, prices);
 
           if (prices[0] && budget && city) {
             socialLifestyleList.push({
               cityId: city.id,
               yearId: prices[0].yearId,
               currency: "EUR",
-              type: SocialType.SOLO,
+              type: SocialType.FAMILY,
               avg_price: budget,
             });
             console.log(
