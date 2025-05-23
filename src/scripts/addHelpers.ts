@@ -1,7 +1,11 @@
 import { ProductType } from "../types/api";
 import { SocialType } from "../types/utils";
-import { recalculateBudget } from "../utils/budget";
-import { addBudgetType, addProductType, changeUnmarkedPrices } from "../utils/scrapCurrent";
+import { recalculateBudget, recalculateBudgetsByType } from "../utils/budget";
+import {
+  addBudgetType,
+  addProductType,
+  changeUnmarkedPrices,
+} from "../utils/scrapCurrent";
 
 (async function () {
   const token = process.env.AUTH_TOKEN;
@@ -39,9 +43,8 @@ import { addBudgetType, addProductType, changeUnmarkedPrices } from "../utils/sc
     // }
 
     // try {
-    //   const cityId = 239;
-    //   console.log("Start recalculation with city: ", cityId);
-    //   await recalculateBudget(cityId, token);
+    //   console.log("Start recalculation of all FAMILY budgets.");
+    //   await recalculateBudgetsByType(SocialType.FAMILY, token);
     // } catch (error) {
     //   if (error instanceof Error) {
     //     console.log(error.message);
