@@ -42,15 +42,15 @@ import {
     //   }
     // }
 
-    // try {
-    //   console.log("Start recalculation of all FAMILY budgets.");
-    //   await recalculateBudgetsByType(SocialType.FAMILY, token);
-    // } catch (error) {
-    //   if (error instanceof Error) {
-    //     console.log(error.message);
-    //     throw error;
-    //   }
-    // }
+    try {
+      console.log("Start recalculation of all FAMILY budgets.");
+      await recalculateBudgetsByType(SocialType.FAMILY, token);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(error.message);
+        throw error;
+      }
+    }
   }
 
   console.log("ADD HELPERS SCRIPT IS DONE");
