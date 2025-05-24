@@ -53,10 +53,10 @@ export const SOLO_BUDGET: BudgetItem[] = [
   { productId: 41, quantity: 1 }, // Fitness club
   { productId: 43, quantity: 2 }, // Cinema
 
-  { productId: 44, quantity: 0.1 }, // Jeans
-  { productId: 45, quantity: 0.1 }, // Summer dress
-  { productId: 46, quantity: 0.1 }, // Running shoes
-  { productId: 47, quantity: 0.05 }, // Leather business shoes
+  { productId: 44, quantity: 0.2 }, // Jeans
+  { productId: 45, quantity: 0.2 }, // Summer dress
+  { productId: 46, quantity: 0.2 }, // Running shoes
+  { productId: 47, quantity: 0.2 }, // Leather business shoes
 ];
 
 export const PAIR_BUDGET: BudgetItem[] = [
@@ -98,10 +98,10 @@ export const PAIR_BUDGET: BudgetItem[] = [
   { productId: 41, quantity: 2 }, // Fitness club
   { productId: 43, quantity: 4 }, // Cinema
 
-  { productId: 44, quantity: 0.2 }, // Jeans
-  { productId: 45, quantity: 0.2 }, // Summer dress
-  { productId: 46, quantity: 0.2 }, // Running shoes
-  { productId: 47, quantity: 0.1 }, // Leather business shoes
+  { productId: 44, quantity: 0.4 }, // Jeans
+  { productId: 45, quantity: 0.4 }, // Summer dress
+  { productId: 46, quantity: 0.4 }, // Running shoes
+  { productId: 47, quantity: 0.2 }, // Leather business shoes
 ];
 
 export const FAMILY_BUDGET: BudgetItem[] = [
@@ -144,10 +144,10 @@ export const FAMILY_BUDGET: BudgetItem[] = [
   { productId: 41, quantity: 2 }, // Fitness
   { productId: 43, quantity: 6 }, // Cinema
 
-  { productId: 44, quantity: 0.3 }, // Jeans
-  { productId: 45, quantity: 0.3 }, // Dress
-  { productId: 46, quantity: 0.3 }, // Shoes
-  { productId: 47, quantity: 0.2 }, // Business shoes
+  { productId: 44, quantity: 0.6 }, // Jeans
+  { productId: 45, quantity: 0.6 }, // Dress
+  { productId: 46, quantity: 0.6 }, // Shoes
+  { productId: 47, quantity: 0.4 }, // Business shoes
 
   { productId: 54, quantity: 1 }, // Preschool (use 55 for school)
 ];
