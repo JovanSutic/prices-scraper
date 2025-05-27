@@ -25,3 +25,8 @@ export interface CurrentMaps {
   city: number;
   year: number;
 }
+
+export interface CrimeData {
+  name: string;
+  rank: number;
+}
