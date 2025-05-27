@@ -39,7 +39,6 @@ import { fetchData } from "../utils/fetch";
     }
   }
 
-  console.log(richCities.length);
 
   if (richCities.length) {
     for (let index = 0; index < richCities.length; index++) {

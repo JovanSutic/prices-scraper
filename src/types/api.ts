@@ -99,3 +99,25 @@ export interface SocialLifestyle {
   type: SocialType;
   created_at: string;
 }
+
+export interface CrimeAspect {
+  id: number;
+  name: string;
+  created_at: string;
+}
+
+export interface CrimeRank {
+  id: number;
+  cityId: number;
+  yearId: number;
+  crimeAspectId: number;
+  rank: number;
+  created_at: string;
+}
+
+export interface CreateCrimeRank {
+  cityId: number;
+  yearId: number;
+  crimeAspectId: number;
+  rank: number;
+}
