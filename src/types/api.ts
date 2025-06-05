@@ -121,3 +121,10 @@ export interface CreateCrimeRank {
   crimeAspectId: number;
   rank: number;
 }
+
+export interface CreateCityFeel {
+  cityId: number;
+  rank: number;
+  tags: string;
+  budget: number;
+}
