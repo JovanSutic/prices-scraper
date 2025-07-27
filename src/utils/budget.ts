@@ -424,3 +424,72 @@ export async function recalculateBudgetsByType(
     throw error;
   }
 }
+
+export const SOLO_BUDGET_LOW: BudgetItem[] = [
+  { productId: 28, quantity: 1 }, // Rent (1-bedroom city center)
+  { productId: 38, quantity: 0.5 }, // Utilities
+  { productId: 39, quantity: 1 }, // Internet
+  { productId: 40, quantity: 1 }, // Mobile plan
+
+  { productId: 1, quantity: 5 }, // Inexpensive restaurant meals
+  { productId: 2, quantity: 2 }, // Mid-range 3-course meals
+  { productId: 3, quantity: 2 }, // McMeal
+  { productId: 8, quantity: 5 }, // Cappuccino
+  { productId: 9, quantity: 10 }, // Milk
+  { productId: 10, quantity: 14 }, // Bread
+  { productId: 11, quantity: 4.5 }, // Eggs (12-pack)
+  { productId: 12, quantity: 20 }, // Water (1.5L)
+  { productId: 18, quantity: 5 }, // Rice
+  { productId: 25, quantity: 5.5 }, // Chicken
+  { productId: 26, quantity: 2.5 }, // Beef
+  { productId: 14, quantity: 5 }, // Apples
+  { productId: 20, quantity: 5 }, // Bananas
+  { productId: 15, quantity: 4 }, // Oranges
+  { productId: 19, quantity: 5 }, // Tomatoes
+  { productId: 16, quantity: 5 }, // Potatoes
+  { productId: 21, quantity: 2.5 }, // Onions
+  { productId: 17, quantity: 9 }, // Lettuce
+  { productId: 22, quantity: 3.5 }, // Cheese
+
+  { productId: 13, quantity: 3 }, // Domestic beer (store)
+  { productId: 48, quantity: 3 }, // Imported beer (store)
+  { productId: 4, quantity: 2 }, // Domestic beer (restaurant)
+  { productId: 5, quantity: 1 }, // Imported beer (restaurant)
+  { productId: 23, quantity: 1 }, // Wine
+  { productId: 24, quantity: 1 }, // Cigarettes
+
+  { productId: 36, quantity: 1 }, // Monthly pass (public transport)
+  { productId: 49, quantity: 2 }, // Taxi start
+  { productId: 50, quantity: 5 }, // Taxi 1 km (2.5 km * 2 rides)
+
+  { productId: 41, quantity: 1 }, // Fitness club
+  { productId: 43, quantity: 2 }, // Cinema
+
+  { productId: 44, quantity: 0.1 }, // Jeans
+  { productId: 45, quantity: 0.1 }, // Summer dress
+  { productId: 46, quantity: 0.1 }, // Running shoes
+  { productId: 47, quantity: 0.05 }, // Leather business shoes
+];
+
+export function calculateLowBudget(prices: Price[], city: string): number {
+  let total = 0;
+  const budgetItems = SOLO_BUDGET_LOW;
+
+  for (const item of budgetItems) {
+    const priceObj = prices.find((p) => p.productId === item.productId);
+    if (!priceObj) {
+      console.warn(`Missing price for productId ${item.productId}`);
+      throw new Error(`Missing price for ${city}`);
+      continue;
+    }
+
+    if (priceObj.productId === 28) {
+      total += item.quantity * priceObj.bottom!;
+    } else {
+      total += item.quantity * priceObj.price;
+    }
+  }
+
+  const buffer = total * 0.1;
+  return roundToTwoDecimals(total + buffer);
+}
