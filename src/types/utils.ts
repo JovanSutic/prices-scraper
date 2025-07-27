@@ -15,3 +15,10 @@ export interface AveragePrice {
   yearId: number;
   average_price: number;
 }
+
+export interface CreateLayer {
+  cityId: number;
+  layerTypeId: number;
+  value: number;
+  value_string?: string;
+}
