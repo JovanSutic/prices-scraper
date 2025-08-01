@@ -10,7 +10,8 @@ import { fetchData } from "../utils/fetch";
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   };
-  const country = "United+Kingdom";
+  const country = "Bulgaria";
+  let layerType: "opt_tax" | "budget_low" = "opt_tax";
   console.log(`START ADDING LAYERS FOR ${country}`);
 
   let cities: City[] = [];
@@ -30,22 +31,38 @@ import { fetchData } from "../utils/fetch";
     console.log(error);
   }
 
-  for (const item of cities) {
-    try {
-      const prices: { data: Price[] } = await fetchData(
-        `${baseUrl}prices?sortBy=productId&order=asc&cityId=${item.id}&limit=60&priceType=CURRENT`,
-        { headers }
-      );
+  if (layerType === "opt_tax") {
+    for (const item of cities) {
+      try {
+        const tax = 14;
 
-      const budget = calculateLowBudget(prices.data, item.name);
+        layerItems.push({
+          cityId: item.id,
+          layerTypeId: 3,
+          value: tax,
+        });
+      } catch (error) {
+        console.error(`Failed to fetch prices for city ${item.name}:`, error);
+      }
+    }
+  } else {
+    for (const item of cities) {
+      try {
+        const prices: { data: Price[] } = await fetchData(
+          `${baseUrl}prices?sortBy=productId&order=asc&cityId=${item.id}&limit=60&priceType=CURRENT`,
+          { headers }
+        );
 
-      layerItems.push({
-        cityId: item.id,
-        layerTypeId: 2,
-        value: budget,
-      });
-    } catch (error) {
-      console.error(`Failed to fetch prices for city ${item.name}:`, error);
+        const budget = calculateLowBudget(prices.data, item.name);
+
+        layerItems.push({
+          cityId: item.id,
+          layerTypeId: 2,
+          value: budget,
+        });
+      } catch (error) {
+        console.error(`Failed to fetch prices for city ${item.name}:`, error);
+      }
     }
   }
 
